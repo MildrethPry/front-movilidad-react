@@ -16,7 +16,7 @@ const DEMO_ACCOUNTS = [
   { role: 'Mecánico', email: 'mecanico@uleam.edu.ec' },
   { role: 'Dual C+M', email: 'conductor.mecanico@uleam.edu.ec' },
   { role: 'Facultad', email: 'decano@uleam.edu.ec' },
-  { role: 'Estudiante', email: 'estudiante@test.com' },
+  { role: 'Estudiante', email: 'e1314433382@live.uleam.edu.ec' },
 ] as const;
 
 const Login: React.FC = () => {
@@ -62,17 +62,35 @@ const Login: React.FC = () => {
   };
 
   return (
-    <div className="auth-wrapper">
+    <main className="auth-wrapper">
       <div className="auth-header">
+        <Link to="/" className="auth-back">
+          Volver al inicio
+        </Link>
+        <img
+          className="auth-mark"
+          src="/brand/logo-uleam.png"
+          alt="Escudo institucional ULEAM"
+          width={72}
+          height={72}
+        />
+        <p className="auth-kicker">Universidad Laica Eloy Alfaro de Manabí</p>
         <h1 className="auth-logo">ULEAM Movilidad</h1>
         <p className="auth-subtitle">
-          Sistema de movilización institucional · Universidad Laica Eloy Alfaro
-          de Manabí
+          Sistema de movilización institucional. Solicite viajes, autorice,
+          firme documentos y reciba el detalle de cada aviso.
         </p>
+        <ul className="auth-highlights">
+          <li>Pantalla pensada para computador y para teclado</li>
+          <li>Documentos visibles antes de firmar</li>
+          <li>Notificaciones con origen, destino y qué hacer</li>
+        </ul>
       </div>
 
       <div className="glass-panel auth-card">
-        <h2 style={{ marginBottom: '8px', fontWeight: 600 }}>Iniciar sesión</h2>
+        <h2 id="login-title" style={{ marginBottom: '8px', fontWeight: 600 }}>
+          Iniciar sesión
+        </h2>
         <p className="auth-hint">
           Dominios institucionales:{' '}
           {ULEAM_DOMAINS.map((d) => `@${d}`).join(' · ')}
@@ -101,7 +119,7 @@ const Login: React.FC = () => {
           <span>o acceso local de prueba</span>
         </div>
 
-        <form onSubmit={(e) => void handleSubmit(e)} noValidate>
+        <form onSubmit={(e) => void handleSubmit(e)} noValidate aria-labelledby="login-title">
           <div className="form-group">
             <label className="form-label" htmlFor="email">
               Correo institucional
@@ -192,7 +210,7 @@ const Login: React.FC = () => {
           </p>
         )}
       </div>
-    </div>
+    </main>
   );
 };
 

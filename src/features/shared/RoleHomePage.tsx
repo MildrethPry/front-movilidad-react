@@ -12,6 +12,7 @@ import {
   isDualDocenteFacultad,
   type RoleId,
 } from '../../config/roles';
+import OperationalDashboard from './OperationalDashboard';
 
 type Props = {
   focusRoles: RoleId[];
@@ -25,6 +26,7 @@ export default function RoleHomePage({ focusRoles, title, subtitle }: Props) {
   const items = navForRoles(active.length ? active : roleIds);
   const grouped = groupNavByModule(items);
   const primary = items.filter((i) => i.priority === 'primary');
+  const focusRole = (active[0] || roleIds[0]) as RoleId | undefined;
 
   return (
     <section className="role-home" aria-labelledby="role-home-title">
@@ -53,8 +55,10 @@ export default function RoleHomePage({ focusRoles, title, subtitle }: Props) {
         )}
       </header>
 
+      <OperationalDashboard focusRole={focusRole} />
+
       <section className="role-home-focus" aria-labelledby="focus-title">
-        <h2 id="focus-title">Tareas principales</h2>
+        <h2 id="focus-title">Atajos del panel</h2>
         <div className="role-home-focus-grid">
           {primary.slice(0, 4).map((link) => (
             <Link key={link.id} to={link.path} className="role-home-focus-card">

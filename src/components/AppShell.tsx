@@ -21,6 +21,11 @@ export default function AppShell() {
   const { user, roleIds, logout } = useAuth();
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [desktop, setDesktop] = useState(
+    () =>
+      typeof window !== 'undefined' &&
+      window.matchMedia('(min-width: 961px)').matches
+  );
 
   const items = useMemo(() => navForRoles(roleIds), [roleIds]);
   const grouped = useMemo(() => groupNavByModule(items), [items]);
@@ -28,9 +33,21 @@ export default function AppShell() {
   const roles = roleIds
     .map((r) => SHORT_ROLE[ROLE_LABELS[r]] ?? ROLE_LABELS[r])
     .join(' · ');
+  const drawerOpen = desktop || menuOpen;
 
   useEffect(() => {
-    if (!menuOpen) return;
+    const media = window.matchMedia('(min-width: 961px)');
+    const sync = () => {
+      setDesktop(media.matches);
+      if (media.matches) setMenuOpen(false);
+    };
+    sync();
+    media.addEventListener('change', sync);
+    return () => media.removeEventListener('change', sync);
+  }, []);
+
+  useEffect(() => {
+    if (!menuOpen || desktop) return;
     const prev = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     const onKeyDown = (event: KeyboardEvent) => {
@@ -41,15 +58,7 @@ export default function AppShell() {
       document.body.style.overflow = prev;
       document.removeEventListener('keydown', onKeyDown);
     };
-  }, [menuOpen]);
-
-  useEffect(() => {
-    const onResize = () => {
-      if (window.innerWidth > 960) setMenuOpen(false);
-    };
-    window.addEventListener('resize', onResize);
-    return () => window.removeEventListener('resize', onResize);
-  }, []);
+  }, [menuOpen, desktop]);
 
   const handleLogout = async () => {
     await logout();
@@ -57,8 +66,6 @@ export default function AppShell() {
   };
 
   const closeMenu = () => setMenuOpen(false);
-
-  const showAlerts = roleIds.includes('secretaria');
 
   return (
     <AlertsProvider>
@@ -83,13 +90,15 @@ export default function AppShell() {
             ULEAM Movilidad
           </Link>
           <span className="shell-mobilebar-role">{roles}</span>
-          {showAlerts && <NotificationBell placement="down" />}
+          <NotificationBell placement="down" />
         </header>
 
         <aside
           id="shell-sidebar"
           className={`shell-sidebar${menuOpen ? ' is-open' : ''}`}
           aria-label="Navegación principal"
+          aria-hidden={!drawerOpen}
+          {...(!drawerOpen ? { inert: true } : {})}
         >
           <div className="shell-brand">
             <div className="shell-brand-row">
@@ -108,7 +117,7 @@ export default function AppShell() {
                   </span>
                 </span>
               </Link>
-              {showAlerts && <NotificationBell placement="right" />}
+              <NotificationBell placement="right" />
             </div>
             <p className="shell-role-line">{roles}</p>
             {(isDualConductorMechanic(roleIds) ||

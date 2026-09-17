@@ -2,7 +2,7 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import AppShell from './components/AppShell';
 import RoleRoute from './components/RoleRoute';
-import { LoginPage, RegisterPage } from '@features/auth';
+import { LoginPage, RegisterPage, LandingPage } from '@features/auth';
 import {
   ChecklistDigitalPage,
   DriverFuelTicketsPage,
@@ -39,6 +39,7 @@ import {
   ParticipantsPage,
   ReassignPage,
   ReportsPage,
+  InstitutionalDocumentsPage,
   RateConfigurationPage,
   StudentInvitationsPage,
   TripDetailPage,
@@ -61,9 +62,7 @@ function AppContent() {
       <Routes>
         <Route
           path="/"
-          element={
-            isAuthenticated ? <AppHome /> : <Navigate to="/login" replace />
-          }
+          element={isAuthenticated ? <AppHome /> : <LandingPage />}
         />
         <Route path="/login" element={<LoginPage />} />
         <Route
@@ -103,7 +102,7 @@ function AppContent() {
                 <RoleHomePage
                   focusRoles={['secretaria']}
                   title="Panel de Secretaría"
-                  subtitle="Eje central operativo de movilización."
+                  subtitle="Tablero operativo, cola de trabajo y respaldos PDF."
                 />
               }
             />
@@ -114,7 +113,7 @@ function AppContent() {
             <Route path="taller" element={<WorkshopPanelPage />} />
             <Route path="economico" element={<TransportAuditPanelPage />} />
             <Route path="tarifas" element={<RateConfigurationPage />} />
-            <Route path="documentos" element={<ChecklistDigitalPage />} />
+            <Route path="documentos" element={<InstitutionalDocumentsPage />} />
             <Route path="participantes" element={<ParticipantsPage />} />
             <Route path="autorizar" element={<AuthorizePage />} />
             <Route path="flujo" element={<FlujoPage />} />
@@ -150,6 +149,7 @@ function AppContent() {
             <Route path="pagos" element={<ConductorPaymentsPage />} />
             <Route path="novedades" element={<ConductorNoveltyPage />} />
             <Route path="vehiculo" element={<ConductorVehiclePage />} />
+            <Route path="documentos" element={<InstitutionalDocumentsPage />} />
           </Route>
 
           <Route path="mecanico" element={<RoleRoute roles={['mecanico']} />}>
@@ -167,6 +167,8 @@ function AppContent() {
             <Route path="inspeccion" element={<ChecklistDigitalPage />} />
             <Route path="lubricantes" element={<LubricantsPage />} />
             <Route path="historial" element={<MechanicHistoryPage />} />
+            <Route path="documentos" element={<InstitutionalDocumentsPage />} />
+            <Route path="reportes" element={<ReportsPage />} />
           </Route>
 
           <Route path="docente" element={<RoleRoute roles={['docente']} />}>
@@ -187,6 +189,7 @@ function AppContent() {
             <Route path="flujo" element={<FlujoPage />} />
             <Route path="seguimiento" element={<TripDetailPage />} />
             <Route path="historial" element={<DocumentsHistoryPage />} />
+            <Route path="documentos" element={<InstitutionalDocumentsPage />} />
             <Route path="mapa" element={<MapPage />} />
             <Route path="reportes" element={<ReportsPage />} />
           </Route>
@@ -209,6 +212,7 @@ function AppContent() {
             <Route path="solicitudes" element={<DocumentsHistoryPage />} />
             <Route path="seguimiento" element={<FlujoPage />} />
             <Route path="historial" element={<DocumentsHistoryPage />} />
+            <Route path="documentos" element={<InstitutionalDocumentsPage />} />
             <Route path="mapa" element={<MapPage />} />
             <Route path="reportes" element={<ReportsPage />} />
           </Route>
@@ -229,7 +233,7 @@ function AppContent() {
             />
             <Route path="pendientes" element={<RectorPanelPage />} />
             <Route path="historial" element={<DocumentsHistoryPage />} />
-            <Route path="documentos" element={<DocumentsHistoryPage />} />
+            <Route path="documentos" element={<InstitutionalDocumentsPage />} />
             <Route path="mapa" element={<MapPage />} />
             <Route path="reportes" element={<ReportsPage />} />
           </Route>
@@ -253,6 +257,7 @@ function AppContent() {
             <Route path="flujo" element={<FlujoPage />} />
             <Route path="detalle" element={<TripDetailPage />} />
             <Route path="historial" element={<DocumentsHistoryPage />} />
+            <Route path="documentos" element={<InstitutionalDocumentsPage />} />
             <Route path="mapa" element={<MapPage />} />
           </Route>
         </Route>

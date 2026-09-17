@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import api from '../services/api';
 import { AlertsContext, type AlertItem } from './AlertsContext';
 
@@ -11,10 +12,12 @@ interface AlertsPayload {
 export const AlertsProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
+  const location = useLocation();
   const [alerts, setAlerts] = useState<AlertItem[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [importantUnreadCount, setImportantUnreadCount] = useState(0);
   const [loading, setLoading] = useState(true);
+  const firstLoad = useRef(true);
 
   const applyPayload = (data: AlertsPayload | null) => {
     setAlerts(data?.alerts ?? []);
@@ -22,21 +25,30 @@ export const AlertsProvider: React.FC<{ children: React.ReactNode }> = ({
     setImportantUnreadCount(data?.important_unread_count ?? 0);
   };
 
-  const fetchAlerts = () => {
-    setLoading(true);
+  const fetchAlerts = (silent = false) => {
+    if (!silent) setLoading(true);
     api
       .get('/alertas')
       .then(({ data }) => applyPayload(data))
       .catch(() => applyPayload(null))
-      .finally(() => setLoading(false));
+      .finally(() => {
+        if (!silent) setLoading(false);
+      });
   };
 
   useEffect(() => {
-    api
-      .get('/alertas')
-      .then(({ data }) => applyPayload(data))
-      .catch(() => applyPayload(null))
-      .finally(() => setLoading(false));
+    fetchAlerts(!firstLoad.current);
+    firstLoad.current = false;
+  }, [location.pathname]);
+
+  useEffect(() => {
+    const timer = window.setInterval(() => fetchAlerts(true), 20000);
+    const onFocus = () => fetchAlerts(true);
+    window.addEventListener('focus', onFocus);
+    return () => {
+      window.clearInterval(timer);
+      window.removeEventListener('focus', onFocus);
+    };
   }, []);
 
   const markRead = async (id: number) => {
@@ -54,7 +66,7 @@ export const AlertsProvider: React.FC<{ children: React.ReactNode }> = ({
     try {
       await api.post(`/alertas/${id}/leida`);
     } catch {
-      fetchAlerts();
+      fetchAlerts(true);
     }
   };
 
@@ -65,7 +77,7 @@ export const AlertsProvider: React.FC<{ children: React.ReactNode }> = ({
         unreadCount,
         importantUnreadCount,
         loading,
-        refresh: fetchAlerts,
+        refresh: () => fetchAlerts(true),
         markRead,
       }}
     >

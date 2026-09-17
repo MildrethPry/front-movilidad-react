@@ -22,6 +22,7 @@ const empty = {
   current_mileage: 0,
   next_oil_change_mileage: 5000,
   operational_status: 'disponible',
+  registration_number: '',
 };
 
 const actionBtn: React.CSSProperties = {
@@ -68,6 +69,7 @@ export default function FleetVehiclesPage() {
       current_mileage: Number(v.current_mileage ?? 0),
       next_oil_change_mileage: Number(v.next_oil_change_mileage ?? 5000),
       operational_status: v.operational_status ?? 'disponible',
+      registration_number: v.registration_number ?? '',
     });
     setDocuments(
       Object.fromEntries(
@@ -112,6 +114,7 @@ export default function FleetVehiclesPage() {
           current_mileage: form.current_mileage,
           next_oil_change_mileage: form.next_oil_change_mileage,
           operational_status: form.operational_status,
+          registration_number: form.registration_number,
         });
         setMsg(data.message);
       } else {
@@ -125,6 +128,7 @@ export default function FleetVehiclesPage() {
           current_mileage: form.current_mileage,
           next_oil_change_mileage: form.next_oil_change_mileage,
           operational_status: form.operational_status,
+          registration_number: form.registration_number,
         });
         setMsg(data.message);
         vehicleId = data.vehicle?.id ?? null;
@@ -202,6 +206,14 @@ export default function FleetVehiclesPage() {
             onChange={(e) => setForm({ ...form, plate: e.target.value })}
             disabled={!!editingId}
             required={!editingId}
+          />
+          <Input
+            id="vehicle-registration"
+            label="No. matrícula"
+            value={form.registration_number}
+            onChange={(e) =>
+              setForm({ ...form, registration_number: e.target.value })
+            }
           />
           <Input
             id="vehicle-brand"

@@ -6,6 +6,7 @@ export interface AlertItem {
   severity: 'alta' | 'media' | 'baja';
   title: string;
   message: string;
+  detail?: Record<string, string | number | null>;
   route: string | null;
   created_at: string;
   read: boolean;

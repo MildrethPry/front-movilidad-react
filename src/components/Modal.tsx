@@ -1,5 +1,6 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useId, useRef } from 'react';
 import { X } from 'lucide-react';
+import { getFocusable, trapTabKey } from '@/lib/focusTrap';
 
 interface ModalProps {
   isOpen: boolean;
@@ -19,151 +20,81 @@ const Modal: React.FC<ModalProps> = ({
   size = 'md',
 }) => {
   const dialogRef = useRef<HTMLDivElement>(null);
+  const lastFocus = useRef<HTMLElement | null>(null);
+  const titleId = useId();
 
   useEffect(() => {
     if (!isOpen) return;
 
+    lastFocus.current = document.activeElement as HTMLElement | null;
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
-    dialogRef.current?.focus();
+
+    const frame = window.requestAnimationFrame(() => {
+      const first = dialogRef.current
+        ? getFocusable(dialogRef.current)[0]
+        : undefined;
+      (first || dialogRef.current)?.focus();
+    });
 
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') onClose();
+      if (event.key === 'Escape') {
+        event.stopPropagation();
+        onClose();
+        return;
+      }
+      if (dialogRef.current) trapTabKey(dialogRef.current, event);
     };
 
     document.addEventListener('keydown', handleKeyDown);
     return () => {
+      window.cancelAnimationFrame(frame);
       document.body.style.overflow = previousOverflow;
       document.removeEventListener('keydown', handleKeyDown);
+      lastFocus.current?.focus();
     };
   }, [isOpen, onClose]);
 
   if (!isOpen) return null;
 
-  const getMaxWidth = () => {
-    switch (size) {
-      case 'sm':
-        return '380px';
-      case 'lg':
-        return '800px';
-      case 'xl':
-        return '1140px';
-      case 'md':
-      default:
-        return size && !['sm', 'md', 'lg', 'xl'].includes(size)
-          ? size
-          : '550px';
-    }
-  };
-
-  const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (e.target === e.currentTarget) {
-      onClose();
-    }
-  };
+  const sizeClass =
+    size === 'sm'
+      ? 'is-sm'
+      : size === 'lg'
+        ? 'is-lg'
+        : size === 'xl'
+          ? 'is-xl'
+          : 'is-md';
 
   return (
     <div
-      onClick={handleBackdropClick}
-      role="presentation"
-      style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        backgroundColor: 'rgba(0, 0, 0, 0.4)',
-        backdropFilter: 'blur(4px)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        // Leaflet controls use z-index 1000; dialogs must stay above every map layer.
-        zIndex: 1100,
-        padding: '20px',
+      className="ui-modal-backdrop"
+      onClick={(event) => {
+        if (event.target === event.currentTarget) onClose();
       }}
+      role="presentation"
     >
       <div
-        className="glass-panel"
+        className={`glass-panel ui-modal ${sizeClass}`}
         ref={dialogRef}
         role="dialog"
         aria-modal="true"
-        aria-labelledby="modal-title"
+        aria-labelledby={titleId}
         tabIndex={-1}
-        style={{
-          width: '100%',
-          maxWidth: getMaxWidth(),
-          maxHeight: '90vh',
-          overflowY: 'auto',
-          display: 'flex',
-          flexDirection: 'column',
-          boxShadow: 'var(--shadow-lg)',
-        }}
       >
-        {/* Modal Header */}
-        <header
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            padding: '20px 24px',
-            borderBottom: '1px solid var(--border-color)',
-          }}
-        >
-          <h2
-            id="modal-title"
-            style={{
-              fontSize: '18px',
-              fontWeight: 700,
-              color: 'var(--color-primary)',
-              margin: 0,
-            }}
-          >
-            {title}
-          </h2>
+        <header className="ui-modal-head">
+          <h2 id={titleId}>{title}</h2>
           <button
             type="button"
+            className="ui-modal-close"
             onClick={onClose}
             aria-label="Cerrar ventana"
-            style={{
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-              color: 'var(--text-muted)',
-              padding: '4px',
-              borderRadius: '4px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              transition: 'var(--transition-smooth)',
-            }}
-            className="hover:bg-gray-100"
           >
-            <X size={18} />
+            <X size={18} aria-hidden />
           </button>
         </header>
-
-        {/* Modal Content */}
-        <div style={{ padding: '24px', flex: 1, overflowY: 'auto' }}>
-          {children}
-        </div>
-
-        {/* Modal Footer */}
-        {footer && (
-          <footer
-            style={{
-              padding: '16px 24px',
-              borderTop: '1px solid var(--border-color)',
-              display: 'flex',
-              justifyContent: 'flex-end',
-              gap: '12px',
-              backgroundColor: '#fafafa',
-              borderBottomLeftRadius: '16px',
-              borderBottomRightRadius: '16px',
-            }}
-          >
-            {footer}
-          </footer>
-        )}
+        <div className="ui-modal-body">{children}</div>
+        {footer && <footer className="ui-modal-foot">{footer}</footer>}
       </div>
     </div>
   );

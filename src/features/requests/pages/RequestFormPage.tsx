@@ -51,6 +51,11 @@ const RequestForm: React.FC = () => {
   const [locatingDestination, setLocatingDestination] = useState(false);
   const [locationError, setLocationError] = useState<string | null>(null);
   const [travelReason, setTravelReason] = useState<string>('');
+  const [occupantCount, setOccupantCount] = useState('1');
+  const [publicServantsCount, setPublicServantsCount] = useState('0');
+  const [communicationNumber, setCommunicationNumber] = useState('');
+  const [activityType, setActivityType] = useState('visitas_academicas');
+  const [academicProgram, setAcademicProgram] = useState('');
   const [departureDate, setDepartureDate] = useState<string>('');
   const [departureTime, setDepartureTime] = useState<string>('');
   const [returnDate, setReturnDate] = useState<string>('');
@@ -90,6 +95,11 @@ const RequestForm: React.FC = () => {
     destination_latitude: destinationPoint.lat,
     destination_longitude: destinationPoint.lng,
     travel_reason: travelReason,
+    occupant_count: Number(occupantCount) || 1,
+    public_servants_count: Number(publicServantsCount) || 0,
+    communication_number: communicationNumber || null,
+    activity_type: activityType || null,
+    academic_program: academicProgram || null,
     departure_date: departureDate,
     departure_time: departureTime,
     return_date: returnDate,
@@ -485,6 +495,56 @@ const RequestForm: React.FC = () => {
                   {errors.travel_reason[0]}
                 </span>
               )}
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <Input
+                type="number"
+                label="N.º ocupantes"
+                min={1}
+                value={occupantCount}
+                onChange={(e) => setOccupantCount(e.target.value)}
+              />
+              <Input
+                type="number"
+                label="Servidores públicos"
+                min={0}
+                value={publicServantsCount}
+                onChange={(e) => setPublicServantsCount(e.target.value)}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <Input
+                label="N.º de comunicación"
+                placeholder="Oficio / memo"
+                value={communicationNumber}
+                onChange={(e) => setCommunicationNumber(e.target.value)}
+              />
+              <Input
+                label="Carrera / programa"
+                value={academicProgram}
+                onChange={(e) => setAcademicProgram(e.target.value)}
+              />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Tipo de actividad (PST-01)</label>
+              <select
+                className="form-select"
+                value={activityType}
+                onChange={(e) => setActivityType(e.target.value)}
+              >
+                <option value="visitas_academicas">Visitas académicas</option>
+                <option value="clases_practicas">Clases prácticas</option>
+                <option value="proyectos_vinculacion">Proyectos de vinculación</option>
+                <option value="congresos_cursos">Congresos y/o cursos</option>
+                <option value="reuniones_interinstitucionales">
+                  Reuniones interinstitucionales
+                </option>
+                <option value="reuniones_matriz">
+                  Reuniones en matriz y/o extensión
+                </option>
+                <option value="otros">Otros</option>
+              </select>
             </div>
 
             <Button

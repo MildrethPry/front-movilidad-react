@@ -40,23 +40,17 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           <input
             id={inputId}
             ref={ref}
-            className={`form-input ${error ? 'border-red-500 focus:ring-red-500/20' : ''} ${className}`}
+            className={`form-input ${className}`.trim()}
             style={icon ? undefined : { paddingLeft: '16px' }}
             {...props}
+            aria-invalid={error ? true : undefined}
+            aria-describedby={error ? `${inputId}-error` : undefined}
           />
         </div>
         {error && (
-          <span
-            style={{
-              fontSize: '11px',
-              color: 'var(--danger)',
-              marginTop: '4px',
-              display: 'block',
-              fontWeight: 500,
-            }}
-          >
+          <p id={`${inputId}-error`} className="form-error" role="alert">
             {error}
-          </span>
+          </p>
         )}
       </div>
     );

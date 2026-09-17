@@ -15,6 +15,7 @@ export { default as MapPage } from './pages/MapPage';
 export { default as ConductorRouteMapPage } from './pages/ConductorRouteMapPage';
 export { default as DisponibilidadPage } from './pages/DisponibilidadPage';
 export { default as ReportsPage } from './pages/ReportsPage';
+export { default as InstitutionalDocumentsPage } from './pages/InstitutionalDocumentsPage';
 export {
   ConductorStopsPage,
   ConductorPaymentsPage,

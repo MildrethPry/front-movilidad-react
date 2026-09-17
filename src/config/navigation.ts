@@ -181,7 +181,7 @@ export const NAV_ITEMS: NavItem[] = [
     module: 'Economía',
     roles: ['secretaria'],
     status: 'ready',
-    description: 'CSV y resúmenes',
+    description: 'PDF institucional (respaldo físico) y CSV',
     priority: 'primary',
   },
   {
@@ -212,7 +212,7 @@ export const NAV_ITEMS: NavItem[] = [
     module: 'Economía',
     roles: ['secretaria'],
     status: 'ready',
-    description: 'Actas e historial',
+    description: 'PDF institucionales y adjuntos',
     priority: 'secondary',
   },
   {
@@ -290,6 +290,16 @@ export const NAV_ITEMS: NavItem[] = [
     description: 'Km y mantenimiento',
     priority: 'secondary',
   },
+  {
+    id: 'con-documentos',
+    label: 'Documentos',
+    path: '/app/conductor/documentos',
+    module: 'Administrativo',
+    roles: ['conductor'],
+    status: 'ready',
+    description: 'Orden, hoja de ruta y novedades en PDF',
+    priority: 'secondary',
+  },
 
   // Mecánico
   {
@@ -332,6 +342,26 @@ export const NAV_ITEMS: NavItem[] = [
     roles: ['mecanico'],
     status: 'ready',
     description: 'OT ejecutadas',
+    priority: 'secondary',
+  },
+  {
+    id: 'mec-documentos',
+    label: 'Documentos',
+    path: '/app/mecanico/documentos',
+    module: 'Taller',
+    roles: ['mecanico'],
+    status: 'ready',
+    description: 'Actas, OT y lubricantes en PDF',
+    priority: 'primary',
+  },
+  {
+    id: 'mec-reportes',
+    label: 'Reportes',
+    path: '/app/mecanico/reportes',
+    module: 'Taller',
+    roles: ['mecanico'],
+    status: 'ready',
+    description: 'Aceite y novedades',
     priority: 'secondary',
   },
 
@@ -431,6 +461,17 @@ export const NAV_ITEMS: NavItem[] = [
     description: 'Viajes solicitados',
     priority: 'secondary',
   },
+  {
+    id: 'doc-documentos',
+    label: 'Documentos PDF',
+    shortLabel: 'PDF',
+    path: '/app/docente/documentos',
+    module: 'Después del viaje',
+    roles: ['docente'],
+    status: 'ready',
+    description: 'Orden y hoja de ruta',
+    priority: 'primary',
+  },
 
   // Facultad
   {
@@ -486,6 +527,17 @@ export const NAV_ITEMS: NavItem[] = [
     description: 'Filtros por periodo',
     priority: 'secondary',
   },
+  {
+    id: 'fac-documentos',
+    label: 'Documentos PDF',
+    shortLabel: 'PDF',
+    path: '/app/facultad/documentos',
+    module: 'Facultad',
+    roles: ['responsable_facultad'],
+    status: 'ready',
+    description: 'Formatos de su unidad',
+    priority: 'primary',
+  },
 
   // Vicerrector
   {
@@ -537,7 +589,7 @@ export const NAV_ITEMS: NavItem[] = [
     module: 'Vicerrectorado',
     roles: ['vicerrector'],
     status: 'ready',
-    description: 'Documentación',
+    description: 'Documentación PDF y adjuntos',
     priority: 'secondary',
   },
 
@@ -603,6 +655,16 @@ export const NAV_ITEMS: NavItem[] = [
     roles: ['estudiante'],
     status: 'ready',
     description: 'Viajes propios',
+    priority: 'secondary',
+  },
+  {
+    id: 'est-documentos',
+    label: 'Documentos',
+    path: '/app/estudiante/documentos',
+    module: 'Mis viajes',
+    roles: ['estudiante'],
+    status: 'ready',
+    description: 'Orden y hoja de ruta de su viaje',
     priority: 'secondary',
   },
 ];

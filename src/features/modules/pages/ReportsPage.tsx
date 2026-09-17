@@ -1,9 +1,37 @@
 import { useMemo, useState } from 'react';
-import { Download, FileBarChart2 } from 'lucide-react';
+import { Download, FileBarChart2, FileText } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import api from '@/services/api';
+import { REQUEST_STATUS_LABEL, labelOf } from '@/lib/labels';
 
-type ReportKind = 'solicitudes' | 'viajes' | 'flota';
+type ReportKind = 'solicitudes' | 'viajes' | 'flota' | 'mensual' | 'aceite' | 'novedades';
+
+const KIND_META: Record<ReportKind, { code: string; title: string }> = {
+  solicitudes: { code: 'PST-01-RPT-SOL', title: 'Registro de solicitudes' },
+  viajes: { code: 'PST-01-F-006-RPT', title: 'Hojas de ruta' },
+  flota: { code: 'FLOTA-RPT', title: 'Estado de flota' },
+  mensual: { code: 'PAM-04-F-007', title: 'Informe mensual de viajes' },
+  aceite: { code: 'CTRL-ACEITE', title: 'Control de cambio de aceite' },
+  novedades: { code: 'LIBRO-NOVEDADES', title: 'Libro de novedades' },
+};
+
+async function downloadReport(kind: ReportKind, format: 'csv' | 'pdf', params: URLSearchParams) {
+  const token = localStorage.getItem('access_token');
+  const next = new URLSearchParams(params);
+  next.set('format', format);
+  const base = (api.defaults.baseURL || 'http://localhost:8000/api').replace(/\/$/, '');
+  const res = await fetch(`${base}/reportes/${kind}?${next}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) throw new Error(`No se pudo descargar el ${format.toUpperCase()}.`);
+  const blob = await res.blob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${KIND_META[kind].code}.${format}`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
 
 export default function ReportsPage() {
   const { roleIds } = useAuth();
@@ -21,12 +49,28 @@ export default function ReportsPage() {
     ];
     if (roleIds.some((r) => ['secretaria', 'vicerrector'].includes(r))) {
       items.push({ id: 'viajes', label: 'Viajes / hojas de ruta' });
+      items.push({ id: 'mensual', label: 'Informe mensual de viajes (PAM-04-F-007)' });
+    }
+    if (roleIds.some((r) => ['secretaria', 'mecanico'].includes(r))) {
+      items.push({ id: 'aceite', label: 'Control de cambio de aceite' });
+      items.push({ id: 'novedades', label: 'Libro de novedades' });
     }
     if (roleIds.includes('secretaria')) {
       items.push({ id: 'flota', label: 'Estado de flota' });
     }
+    if (roleIds.includes('conductor') && !roleIds.includes('secretaria')) {
+      items.push({ id: 'novedades', label: 'Mis novedades' });
+    }
     return items;
   }, [roleIds]);
+
+  const filterParams = () => {
+    const params = new URLSearchParams();
+    if (from) params.set('from', from);
+    if (to) params.set('to', to);
+    if (status) params.set('status', status);
+    return params;
+  };
 
   const load = async () => {
     setLoading(true);
@@ -48,48 +92,36 @@ export default function ReportsPage() {
     }
   };
 
-  const downloadCsv = async () => {
-    const token = localStorage.getItem('access_token');
-    const params = new URLSearchParams({
-      format: 'csv',
-      ...(from ? { from } : {}),
-      ...(to ? { to } : {}),
-      ...(status ? { status } : {}),
-    });
-    const base = (api.defaults.baseURL || 'http://localhost:8000/api').replace(
-      /\/$/,
-      ''
-    );
-    const res = await fetch(`${base}/reportes/${kind}?${params}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    if (!res.ok) {
-      setError('No se pudo descargar el CSV.');
-      return;
+  const exportFile = async (format: 'csv' | 'pdf') => {
+    try {
+      await downloadReport(kind, format, filterParams());
+    } catch {
+      setError(`No se pudo descargar el ${format.toUpperCase()} institucional.`);
     }
-    const blob = await res.blob();
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `reporte_${kind}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
   };
 
   const rows = data?.rows || [];
+  const statusSummary = data?.summary?.por_estado
+    ? Object.entries(data.summary.por_estado as Record<string, number>)
+    : [];
+  const maxStatus = Math.max(1, ...statusSummary.map(([, n]) => Number(n)));
 
   return (
     <section className="module-page">
       <header className="module-header">
         <p className="module-kicker">Inteligencia operativa</p>
-        <h1>Reportes</h1>
+        <h1>Reportes institucionales</h1>
         <p className="module-lead">
-          Genere reportes filtrados según su rol. Exportables a CSV para Excel o
-          auditoría.
+          Consulte en pantalla y descargue el PDF con el mismo formato ULEAM para
+          archivo físico. El CSV queda para Excel.
         </p>
       </header>
 
-      {error && <div className="alert alert-danger" role="alert">{error}</div>}
+      {error && (
+        <div className="alert alert-danger" role="alert">
+          {error}
+        </div>
+      )}
 
       <div className="module-panel report-filters">
         <label>
@@ -129,7 +161,7 @@ export default function ReportsPage() {
             Estado
             <input
               className="form-input"
-              placeholder="ej. aprobada"
+              placeholder="ej. pendiente_secretaria"
               value={status}
               onChange={(e) => setStatus(e.target.value)}
             />
@@ -142,17 +174,27 @@ export default function ReportsPage() {
           disabled={loading}
         >
           <FileBarChart2 size={16} aria-hidden />{' '}
-          {loading ? 'Generando…' : 'Generar'}
+          {loading ? 'Generando…' : 'Consultar'}
         </button>
         <button
           type="button"
           className="btn btn-uleam-sso"
-          onClick={() => void downloadCsv()}
-          disabled={!data}
+          onClick={() => void exportFile('pdf')}
+        >
+          <FileText size={16} aria-hidden /> PDF respaldo
+        </button>
+        <button
+          type="button"
+          className="btn btn-outline"
+          onClick={() => void exportFile('csv')}
         >
           <Download size={16} aria-hidden /> CSV
         </button>
       </div>
+
+      <p className="ops-muted">
+        Formato {KIND_META[kind].code} · {KIND_META[kind].title}
+      </p>
 
       {data && (
         <div className="report-summary">
@@ -172,6 +214,18 @@ export default function ReportsPage() {
               <strong>{data.summary.mantenimiento_vencido}</strong>
             </div>
           )}
+          {data.summary?.vencidos != null && (
+            <div className="stat-card">
+              <span>Aceite vencido</span>
+              <strong>{data.summary.vencidos}</strong>
+            </div>
+          )}
+          {data.summary?.km_total != null && (
+            <div className="stat-card">
+              <span>Km recorridos</span>
+              <strong>{data.summary.km_total}</strong>
+            </div>
+          )}
           <div className="stat-card">
             <span>Generado</span>
             <strong>
@@ -181,9 +235,33 @@ export default function ReportsPage() {
         </div>
       )}
 
+      {statusSummary.length > 0 && (
+        <div className="module-panel" style={{ marginBottom: 16 }}>
+          <h2 style={{ fontSize: 16, marginBottom: 10 }}>Por estado</h2>
+          <div className="ops-bars">
+            {statusSummary.map(([label, value]) => (
+              <div key={label} className="ops-bar-row">
+                <span>{labelOf(REQUEST_STATUS_LABEL, label)}</span>
+                <div className="ops-bar-track">
+                  <div
+                    className="ops-bar-fill"
+                    style={{
+                      width: `${Math.max(6, (Number(value) / maxStatus) * 100)}%`,
+                    }}
+                  />
+                </div>
+                <strong>{String(value)}</strong>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       <div className="module-panel" style={{ overflowX: 'auto' }}>
         {rows.length === 0 ? (
-          <p className="ops-muted">Genere un reporte para ver resultados.</p>
+          <p className="ops-muted">
+            Consulte un reporte para ver resultados o descargue el PDF de respaldo.
+          </p>
         ) : (
           <table className="ops-table">
             <thead>
