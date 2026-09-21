@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { ShieldAlert, Check, X, RefreshCw, AlertTriangle } from 'lucide-react';
 import api from '@/services/api';
+import ProcessPhaseLine, {
+  type ProcessPhase,
+} from '@/features/shared/ProcessPhaseLine';
+import { useAlerts } from '@/context/AlertsContext';
 
 interface RequestData {
   id: number;
@@ -13,6 +17,7 @@ interface RequestData {
   estimated_days: number;
   projected_cost: number;
   status: string;
+  phases?: ProcessPhase[];
   requester?: {
     first_name: string;
     last_name: string;
@@ -21,6 +26,7 @@ interface RequestData {
 }
 
 const RectorPanel: React.FC = () => {
+  const { refresh } = useAlerts();
   const [requests, setRequests] = useState<RequestData[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [errors, setErrors] = useState<string | null>(null);
@@ -35,6 +41,7 @@ const RectorPanel: React.FC = () => {
     try {
       const response = await api.get('/solicitudes');
       setRequests(response.data);
+      refresh();
     } catch (err: any) {
       setErrors(
         err.response?.data?.message ||
@@ -165,6 +172,11 @@ const RectorPanel: React.FC = () => {
                         <h3 className="text-lg font-bold text-primary mt-1.5">
                           {req.origin} &rarr; {req.destination}
                         </h3>
+                        {req.phases && req.phases.length > 0 && (
+                          <div className="mt-2">
+                            <ProcessPhaseLine phases={req.phases} compact />
+                          </div>
+                        )}
                       </div>
                       <div className="text-right">
                         <span className="text-xs text-gray-400 block uppercase font-bold">

@@ -3,6 +3,10 @@ import { RefreshCw } from 'lucide-react';
 import { formatDateTimeReadable } from '@/lib/datetime';
 import { MOBILIZATION_TYPE_LABEL, labelOf } from '@/lib/labels';
 import { modulesApi } from '../api';
+import { useAlerts } from '@/context/AlertsContext';
+import ProcessPhaseLine, {
+  type ProcessPhase,
+} from '@/features/shared/ProcessPhaseLine';
 
 type Solicitud = {
   id: number;
@@ -11,6 +15,7 @@ type Solicitud = {
   status: string;
   departure_date: string;
   travel_reason: string;
+  phases?: ProcessPhase[];
   requester?: {
     first_name: string;
     last_name: string;
@@ -19,6 +24,7 @@ type Solicitud = {
 };
 
 export default function AuthorizePage() {
+  const { refresh } = useAlerts();
   const [rows, setRows] = useState<Solicitud[]>([]);
   const [msg, setMsg] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -61,6 +67,7 @@ export default function AuthorizePage() {
       });
       setMsg(data.message);
       await load();
+      refresh();
     } catch (e: unknown) {
       const err = e as { response?: { data?: { message?: string } } };
       setError(err.response?.data?.message || 'No se pudo procesar.');
@@ -130,6 +137,9 @@ export default function AuthorizePage() {
                     {formatDateTimeReadable(r.departure_date)}
                   </p>
                   <p className="ops-muted">{r.travel_reason}</p>
+                  {r.phases && r.phases.length > 0 && (
+                    <ProcessPhaseLine phases={r.phases} compact />
+                  )}
                   <label className="form-label" htmlFor={`obs-${r.id}`}>
                     Observación
                   </label>

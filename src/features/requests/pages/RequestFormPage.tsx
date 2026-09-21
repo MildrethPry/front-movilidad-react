@@ -19,6 +19,10 @@ import Modal from '@/components/Modal';
 import { formatDateReadable } from '@/lib/datetime';
 import { geocodePlace } from '@/lib/geo';
 import { MOBILIZATION_TYPE_LABEL, REQUEST_STATUS_LABEL, labelOf } from '@/lib/labels';
+import ProcessPhaseLine, {
+  type ProcessPhase,
+} from '@/features/shared/ProcessPhaseLine';
+import { useAlerts } from '@/context/AlertsContext';
 
 interface RequestData {
   id: number;
@@ -34,9 +38,11 @@ interface RequestData {
   estimated_days: number;
   projected_cost: number;
   status: string;
+  phases?: ProcessPhase[];
 }
 
 const RequestForm: React.FC = () => {
+  const { refresh: refreshAlerts } = useAlerts();
   // Form fields
   const [mobilizationType, setMobilizationType] = useState<string>('interna');
   const [origin, setOrigin] = useState<string>('MANTA');
@@ -178,6 +184,7 @@ const RequestForm: React.FC = () => {
       const response = await api.post('/solicitudes', requestPayload(true));
 
       setSuccessMsg(response.data.message);
+      refreshAlerts();
       // Reset form
       setDestination('');
       setTravelReason('');
@@ -619,6 +626,11 @@ const RequestForm: React.FC = () => {
                     </div>
                     {getStatusBadge(req.status)}
                   </div>
+                  {req.phases && req.phases.length > 0 && (
+                    <div className="mt-3">
+                      <ProcessPhaseLine phases={req.phases} compact />
+                    </div>
+                  )}
                   <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-100">
                     <span className="text-xs text-gray-500">
                       {labelOf(MOBILIZATION_TYPE_LABEL, req.mobilization_type)}

@@ -2,7 +2,7 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import AppShell from './components/AppShell';
 import RoleRoute from './components/RoleRoute';
-import { LoginPage, RegisterPage, LandingPage } from '@features/auth';
+import { LoginPage, RegisterPage } from '@features/auth';
 import {
   ChecklistDigitalPage,
   DriverFuelTicketsPage,
@@ -62,9 +62,12 @@ function AppContent() {
       <Routes>
         <Route
           path="/"
-          element={isAuthenticated ? <AppHome /> : <LandingPage />}
+          element={isAuthenticated ? <AppHome /> : <LoginPage />}
         />
-        <Route path="/login" element={<LoginPage />} />
+        <Route
+          path="/login"
+          element={isAuthenticated ? <AppHome /> : <LoginPage />}
+        />
         <Route
           path="/register"
           element={
@@ -102,7 +105,7 @@ function AppContent() {
                 <RoleHomePage
                   focusRoles={['secretaria']}
                   title="Panel de Secretaría"
-                  subtitle="Tablero operativo, cola de trabajo y respaldos PDF."
+                  subtitle="Planifique, asigne y controle la flota institucional."
                 />
               }
             />
@@ -138,7 +141,7 @@ function AppContent() {
                 <RoleHomePage
                   focusRoles={['conductor']}
                   title="Panel del Conductor"
-                  subtitle="Ejecute viajes y reporte su unidad."
+                  subtitle="Acepte el viaje, recorra la ruta y reporte la unidad."
                 />
               }
             />
@@ -159,7 +162,7 @@ function AppContent() {
                 <RoleHomePage
                   focusRoles={['mecanico']}
                   title="Panel de Mantenimiento"
-                  subtitle="Órdenes, inspecciones y lubricantes."
+                  subtitle="Mantenimiento preventivo y correctivo de la flota."
                 />
               }
             />
@@ -178,7 +181,7 @@ function AppContent() {
                 <RoleHomePage
                   focusRoles={['docente']}
                   title="Panel Docente"
-                  subtitle="Solicite, invite participantes y liquide."
+                  subtitle="Solicite el vehículo, siga el trámite y conserve el PDF."
                 />
               }
             />
@@ -204,7 +207,7 @@ function AppContent() {
                 <RoleHomePage
                   focusRoles={['responsable_facultad']}
                   title="Panel de Facultad"
-                  subtitle="Solicite viajes y dé seguimiento a su unidad."
+                  subtitle="Solicite en línea y siga el trámite de su facultad."
                 />
               }
             />
@@ -227,7 +230,7 @@ function AppContent() {
                 <RoleHomePage
                   focusRoles={['vicerrector']}
                   title="Panel Vicerrector"
-                  subtitle="Apruebe viajes externos."
+                  subtitle="Autorice viajes externos y deje constancia digital."
                 />
               }
             />
@@ -248,7 +251,7 @@ function AppContent() {
                 <RoleHomePage
                   focusRoles={['estudiante']}
                   title="Panel Estudiante"
-                  subtitle="Confirme participación y califique viajes."
+                  subtitle="Confirme si viaja y consulte el servicio asignado."
                 />
               }
             />

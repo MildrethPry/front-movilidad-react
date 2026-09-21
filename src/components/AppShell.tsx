@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom';
-import { LogOut, Menu, X } from 'lucide-react';
+import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { ChevronDown, LogOut, Menu, UserRound, X } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { AlertsProvider } from '../context/AlertsProvider';
 import NotificationBell from './NotificationBell';
@@ -20,6 +20,7 @@ const SHORT_ROLE: Record<string, string> = {
 export default function AppShell() {
   const { user, roleIds, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
   const [desktop, setDesktop] = useState(
     () =>
@@ -34,6 +35,7 @@ export default function AppShell() {
     .map((r) => SHORT_ROLE[ROLE_LABELS[r]] ?? ROLE_LABELS[r])
     .join(' · ');
   const drawerOpen = desktop || menuOpen;
+  const fullName = `${user?.first_name ?? ''} ${user?.last_name ?? ''}`.trim();
 
   useEffect(() => {
     const media = window.matchMedia('(min-width: 961px)');
@@ -74,7 +76,7 @@ export default function AppShell() {
           Saltar al contenido
         </a>
 
-        <header className="shell-mobilebar">
+        <header className="shell-topbar">
           <button
             type="button"
             className="shell-menu-btn"
@@ -84,13 +86,18 @@ export default function AppShell() {
             onClick={() => setMenuOpen((v) => !v)}
           >
             {menuOpen ? <X size={20} /> : <Menu size={20} />}
-            <span className="sr-only">Menú</span>
           </button>
-          <Link to={home} className="shell-mobilebar-brand" onClick={closeMenu}>
-            ULEAM Movilidad
+          <Link to={home} className="shell-topbar-title" onClick={closeMenu}>
+            SIGMOV-ULEAM
           </Link>
-          <span className="shell-mobilebar-role">{roles}</span>
-          <NotificationBell placement="down" />
+          <div className="shell-topbar-right">
+            <NotificationBell placement="down" />
+            <span className="shell-topbar-role">ROL: {roles}</span>
+            <span className="shell-topbar-user">
+              <UserRound size={16} aria-hidden />
+              {fullName || 'Usuario'}
+            </span>
+          </div>
         </header>
 
         <aside
@@ -101,25 +108,21 @@ export default function AppShell() {
           {...(!drawerOpen ? { inert: true } : {})}
         >
           <div className="shell-brand">
-            <div className="shell-brand-row">
-              <Link to={home} className="shell-brand-link" onClick={closeMenu}>
-                <span className="shell-logo" aria-hidden>
-                  <img
-                    src="/logo-uleam-cara.png"
-                    alt=""
-                    className="shell-logo-img"
-                  />
+            <Link to={home} className="shell-brand-link" onClick={closeMenu}>
+              <span className="shell-logo" aria-hidden>
+                <img
+                  src="/logo-uleam-cara.png"
+                  alt=""
+                  className="shell-logo-img"
+                />
+              </span>
+              <span>
+                <strong className="shell-brand-title">Bienvenido</strong>
+                <span className="shell-brand-sub">
+                  {user?.national_id || roles}
                 </span>
-                <span>
-                  <strong className="shell-brand-title">ULEAM Movilidad</strong>
-                  <span className="shell-brand-sub">
-                    Transporte institucional
-                  </span>
-                </span>
-              </Link>
-              <NotificationBell placement="right" />
-            </div>
-            <p className="shell-role-line">{roles}</p>
+              </span>
+            </Link>
             {(isDualConductorMechanic(roleIds) ||
               isDualDocenteFacultad(roleIds)) && (
               <p className="shell-dual-note">Doble rol activo</p>
@@ -127,35 +130,52 @@ export default function AppShell() {
           </div>
 
           <nav className="shell-nav" aria-label="Módulos">
-            {Object.entries(grouped).map(([module, links]) => (
-              <div key={module} className="shell-nav-group">
-                <p className="shell-nav-group-title">{module}</p>
-                <ul>
-                  {links.map((link) => (
-                    <li key={link.id}>
-                      <NavLink
-                        to={link.path}
-                        className={({ isActive }) =>
-                          `shell-nav-link${isActive ? ' is-active' : ''}`
-                        }
-                        onClick={closeMenu}
-                      >
-                        {navLabel(link, true)}
-                      </NavLink>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
+            <NavLink
+              to={home}
+              end
+              className={({ isActive }) =>
+                `shell-nav-link shell-nav-home${isActive ? ' is-active' : ''}`
+              }
+              onClick={closeMenu}
+            >
+              INICIO
+            </NavLink>
+
+            {Object.entries(grouped).map(([module, links]) => {
+              const groupOpen = links.some((link) =>
+                location.pathname.startsWith(link.path)
+              );
+              return (
+                <details
+                  key={module}
+                  className="shell-nav-group"
+                  open={groupOpen || undefined}
+                >
+                  <summary>
+                    <span>{module}</span>
+                    <ChevronDown size={16} aria-hidden />
+                  </summary>
+                  <ul>
+                    {links.map((link) => (
+                      <li key={link.id}>
+                        <NavLink
+                          to={link.path}
+                          className={({ isActive }) =>
+                            `shell-nav-link${isActive ? ' is-active' : ''}`
+                          }
+                          onClick={closeMenu}
+                        >
+                          {navLabel(link, true)}
+                        </NavLink>
+                      </li>
+                    ))}
+                  </ul>
+                </details>
+              );
+            })}
           </nav>
 
           <footer className="shell-user">
-            <p className="shell-user-name">
-              {user?.first_name} {user?.last_name}
-            </p>
-            {user?.faculty_institution && (
-              <p className="shell-user-meta">{user.faculty_institution}</p>
-            )}
             <button
               type="button"
               className="shell-logout"

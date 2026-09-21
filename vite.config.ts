@@ -22,6 +22,9 @@ export default defineConfig({
   server: {
     host: '0.0.0.0',
     allowedHosts: ['.trycloudflare.com'],
+    watch: {
+      ignored: ['**/public/brand/**'],
+    },
     proxy: {
       '/api': {
         target: 'http://127.0.0.1:8000',

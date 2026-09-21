@@ -12,6 +12,10 @@ import {
 } from 'lucide-react';
 import api from '@/services/api';
 import { MOBILIZATION_TYPE_LABEL, labelOf } from '@/lib/labels';
+import { useAlerts } from '@/context/AlertsContext';
+import ProcessPhaseLine, {
+  type ProcessPhase,
+} from '@/features/shared/ProcessPhaseLine';
 
 interface RequestData {
   id: number;
@@ -24,6 +28,7 @@ interface RequestData {
   estimated_days: number;
   projected_cost: number;
   status: string;
+  phases?: ProcessPhase[];
   requester?: {
     first_name: string;
     last_name: string;
@@ -61,6 +66,7 @@ interface DriverData {
 }
 
 const TransportPanel: React.FC = () => {
+  const { refresh } = useAlerts();
   // Lists from backend
   const [requests, setRequests] = useState<RequestData[]>([]);
   const [vehicles, setVehicles] = useState<VehicleData[]>([]);
@@ -152,6 +158,7 @@ const TransportPanel: React.FC = () => {
       setSelectedVehicleId(null);
       setSelectedDriverId(null);
       loadAllData();
+      refresh();
     } catch (err: any) {
       if (err.response && err.response.data) {
         const data = err.response.data;
@@ -283,6 +290,11 @@ const TransportPanel: React.FC = () => {
                   <h3 className="font-bold text-gray-900 text-sm leading-tight line-clamp-1">
                     {req.origin} &rarr; {req.destination}
                   </h3>
+                  {req.phases && req.phases.length > 0 && (
+                    <div className="mt-2" onClick={(e) => e.stopPropagation()}>
+                      <ProcessPhaseLine phases={req.phases} compact />
+                    </div>
+                  )}
 
                   <div className="text-xs text-gray-500 mt-2 space-y-1">
                     <p className="truncate">

@@ -1,11 +1,7 @@
 import { Link } from 'react-router-dom';
-import { ArrowUpRight, ChevronRight } from 'lucide-react';
+import { ArrowUpRight } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import {
-  groupNavByModule,
-  navForRoles,
-  navLabel,
-} from '../../config/navigation';
+import { ROLE_EXPERIENCE } from '../../config/roleExperience';
 import {
   ROLE_LABELS,
   isDualConductorMechanic,
@@ -23,75 +19,57 @@ type Props = {
 export default function RoleHomePage({ focusRoles, title, subtitle }: Props) {
   const { user, roleIds } = useAuth();
   const active = focusRoles.filter((r) => roleIds.includes(r));
-  const items = navForRoles(active.length ? active : roleIds);
-  const grouped = groupNavByModule(items);
-  const primary = items.filter((i) => i.priority === 'primary');
   const focusRole = (active[0] || roleIds[0]) as RoleId | undefined;
+  const experience = focusRole ? ROLE_EXPERIENCE[focusRole] : undefined;
 
   return (
-    <section className="role-home" aria-labelledby="role-home-title">
-      <header className="role-home-hero">
-        <p className="module-kicker">
-          {active.map((r) => ROLE_LABELS[r]).join(' · ') || 'Panel'}
-        </p>
-        <div className="role-home-title-row">
-          <div>
-            <h1 id="role-home-title">{title}</h1>
-            <p className="module-lead">
-              Hola, {user?.first_name}. {subtitle}
-            </p>
-          </div>
-          <div className="role-home-hero-meta" aria-label="Resumen del panel">
-            <strong>{primary.length}</strong>
-            <span>tareas prioritarias</span>
-          </div>
-        </div>
-        {(isDualConductorMechanic(roleIds) ||
-          isDualDocenteFacultad(roleIds)) && (
-          <p className="role-home-dual" role="note">
-            Doble rol activo: el menú lateral agrupa las funciones de ambos
-            perfiles.
-          </p>
-        )}
+    <section className="role-home sgv-panel" aria-labelledby="role-home-title">
+      <header className="sgv-panel-head">
+        <h1 id="role-home-title">{title}</h1>
       </header>
+      <div className="sgv-panel-body role-home-body">
+        <header className="role-home-hero">
+          <p className="module-kicker">
+            {active.map((r) => ROLE_LABELS[r]).join(' · ') || 'Panel'}
+          </p>
+          <p className="module-lead">
+            Hola, {user?.first_name}. {experience?.promise ?? subtitle}
+          </p>
+          {(isDualConductorMechanic(roleIds) ||
+            isDualDocenteFacultad(roleIds)) && (
+            <p className="role-home-dual" role="note">
+              Doble rol: el menú lateral separa las funciones de cada perfil.
+            </p>
+          )}
+        </header>
 
-      <OperationalDashboard focusRole={focusRole} />
+        {experience && (
+          <nav className="role-pillars" aria-label="Procesos de este panel">
+            {experience.pillars.map((pillar) => (
+              <Link key={pillar.href} to={pillar.href} className="role-pillar">
+                <strong>
+                  {pillar.title}
+                  <ArrowUpRight size={14} aria-hidden />
+                </strong>
+                <span>{pillar.text}</span>
+              </Link>
+            ))}
+          </nav>
+        )}
 
-      <section className="role-home-focus" aria-labelledby="focus-title">
-        <h2 id="focus-title">Atajos del panel</h2>
-        <div className="role-home-focus-grid">
-          {primary.slice(0, 4).map((link) => (
-            <Link key={link.id} to={link.path} className="role-home-focus-card">
-              <span className="role-home-focus-icon" aria-hidden>
-                <ArrowUpRight size={18} />
-              </span>
-              <strong>{navLabel(link)}</strong>
-              <span>{link.description}</span>
-            </Link>
-          ))}
-        </div>
-      </section>
+        <OperationalDashboard focusRole={focusRole} />
 
-      <section className="role-home-all" aria-labelledby="all-title">
-        <h2 id="all-title">Todo el menú</h2>
-        <div className="role-home-columns">
-          {Object.entries(grouped).map(([module, links]) => (
-            <div key={module} className="role-home-column">
-              <h3>{module}</h3>
-              <ul>
-                {links.map((link) => (
-                  <li key={link.id}>
-                    <Link to={link.path}>
-                      <span>{navLabel(link)}</span>
-                      <ChevronRight size={15} aria-hidden />
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
-      </section>
+        {experience && (
+          <details className="role-guide">
+            <summary>Cómo usar este panel</summary>
+            <ol>
+              {experience.guide.map((step) => (
+                <li key={step}>{step}</li>
+              ))}
+            </ol>
+          </details>
+        )}
+      </div>
     </section>
   );
 }
