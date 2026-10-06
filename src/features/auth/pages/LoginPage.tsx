@@ -121,12 +121,6 @@ export default function Login() {
             <small>Sistema Institucional de Gestión y Movilidad</small>
           </div>
         </div>
-        <div className="login-top-right">
-          <span className="login-portal-badge">
-            <span className="login-badge-dot" aria-hidden />
-            Portal Institucional
-          </span>
-        </div>
       </header>
 
       <div className="login-layout">

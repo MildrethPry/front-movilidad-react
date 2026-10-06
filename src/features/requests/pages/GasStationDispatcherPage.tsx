@@ -243,13 +243,13 @@ const GasStationDispatcherPage: React.FC = () => {
           <div className="bg-white border border-green-100 p-4 rounded-2xl w-full text-sm text-left grid grid-cols-2 gap-4 shadow-xs">
             <div>
               <p className="text-gray-400 text-xs">Galones Despachados</p>
-              <p className="font-bold text-primary font-mono text-base">
+              <p className="font-bold text-primary text-base">
                 {dispatchedGallons} Galones
               </p>
             </div>
             <div>
               <p className="text-gray-400 text-xs">Importe de Transacción</p>
-              <p className="font-bold text-primary font-mono text-base">
+              <p className="font-bold text-primary text-base">
                 ${Number(totalPaid).toFixed(2)} USD
               </p>
             </div>
@@ -337,7 +337,7 @@ const GasStationDispatcherPage: React.FC = () => {
                           {order.route_sheet.vehicle.brand}{' '}
                           {order.route_sheet.vehicle.model}
                         </p>
-                        <p className="font-mono text-xs text-secondary-brand font-bold uppercase">
+                        <p className="text-xs text-secondary-brand font-bold uppercase">
                           {order.route_sheet.vehicle.plate}
                         </p>
                       </div>
@@ -352,7 +352,7 @@ const GasStationDispatcherPage: React.FC = () => {
                         <p className="text-muted text-xs">
                           Combustible Autorizado
                         </p>
-                        <p className="font-bold text-gold-dark font-mono uppercase">
+                        <p className="font-bold text-gold-dark uppercase">
                           {labelOf(FUEL_TYPE_LABEL, order.dispatched_fuel_type)}
                         </p>
                       </div>
@@ -384,7 +384,7 @@ const GasStationDispatcherPage: React.FC = () => {
                         <p className="text-muted text-xs">
                           Cupo Máximo Autorizado
                         </p>
-                        <p className="font-bold text-success font-mono">
+                        <p className="font-bold text-success ">
                           {order.authorized_gallons} Galones
                         </p>
                         <p className="text-muted text-xs">

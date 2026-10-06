@@ -494,7 +494,7 @@ export default function InstitutionalDocumentsPage() {
 
       <div className="sgv-table-card" style={{ marginTop: 20 }}>
         {docs.length === 0 ? (
-          <div className="p-8 text-center text-slate-400 text-sm">
+          <div className="p-8 text-center text-slate-500 text-sm">
             Aún no hay documentos emitidos o archivados en el repositorio.
           </div>
         ) : (
@@ -519,12 +519,12 @@ export default function InstitutionalDocumentsPage() {
                   const canSign = slots.some((s) => s.can_sign);
                   return (
                     <tr key={d.id}>
-                      <td className="font-mono font-semibold text-slate-800">#{d.id}</td>
+                      <td className="font-semibold text-slate-800">#{d.id}</td>
                       <td>
                         <span className="font-semibold text-primary block">
                           {catalog[d.document_type]?.label || d.document_type}
                         </span>
-                        <span className="text-xs text-slate-400">
+                        <span className="text-xs text-slate-500">
                           {catalog[d.document_type]?.code || 'DOC-ULEAM'}
                         </span>
                       </td>
@@ -541,16 +541,16 @@ export default function InstitutionalDocumentsPage() {
                             )}
                           </div>
                         ) : (
-                          <span className="text-slate-400">—</span>
+                          <span className="text-slate-500">—</span>
                         )}
                       </td>
                       <td>
                         {slots.length === 0 ? (
-                          <span className="text-slate-400">—</span>
+                          <span className="text-slate-500">—</span>
                         ) : (
                           <div className="flex flex-col gap-1">
                             <div className="flex items-center gap-2">
-                              <span className="font-mono text-xs font-bold text-slate-700">
+                              <span className="text-xs font-bold text-slate-700">
                                 {signedCount}/{slots.length}
                               </span>
                               <span
@@ -567,7 +567,7 @@ export default function InstitutionalDocumentsPage() {
                                   : 'Firmas pendientes'}
                               </span>
                             </div>
-                            <span className="text-xs text-slate-400">
+                            <span className="text-xs text-slate-500">
                               {slots
                                 .filter((s) => s.signed)
                                 .map((s) => `${s.label}${s.valid ? ' ✓' : ''}`)
